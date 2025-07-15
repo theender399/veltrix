@@ -1,16 +1,37 @@
-<div id="menu-superior">
-  <div class="menu-item" onclick="location.href='estado.html'">
-    Estado
-    <div class="descripcion">Estado de los servidores</div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inicio - Veltrix</title>
+  <link rel="stylesheet" href="inicio.css" />
+</head>
+<body>
+  <header>
+    <img src="imagenes/logo.png" alt="Logo Veltrix" class="logo" />
+    <h1>Bienvenido a Veltrix</h1>
+  </header>
+
+  <!-- Menú superior -->
+  <div id="menu-superior">
+    <div class="menu-item" onclick="location.href='estado.html'">
+      Estado
+      <div class="descripcion">Estado de los servidores</div>
+    </div>
+
+    <div class="menu-item" onclick="window.open('https://discord.gg/tu-servidor', '_blank')">
+      Discord
+      <div class="descripcion">Únete a nuestra comunidad</div>
+    </div>
+
+    <div class="menu-item tienda" onclick="alert('La tienda estará disponible pronto!')">
+      Tienda
+      <div class="descripcion proximamente">Próximamente</div>
+    </div>
   </div>
 
-  <div class="menu-item" onclick="window.open('https://discord.gg/tu-servidor', '_blank')">
-    Discord
-    <div class="descripcion">Únete a nuestra comunidad</div>
-  </div>
-
-  <div class="menu-item tienda" onclick="alert('La tienda estará disponible pronto!')">
-    Tienda
-    <div class="descripcion proximamente">Próximamente</div>
-  </div>
-</div>
+  <main>
+    <p>Contenido principal de la página de inicio aquí.</p>
+  </main>
+</body>
+</html>
