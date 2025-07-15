@@ -1,186 +1,55 @@
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #111;
-  color: #00ffaa;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100vh;
-  text-align: center;
-  padding-top: 60px; /* para menú fijo */
-}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Estado de Servidores Minecraft</title>
+  <link rel="stylesheet" href="estilo.css" />
+  <link rel="stylesheet" href="estado.css" />
+</head>
+<body>
+  <header>
+    <img src="imagenes/logo.png" alt="Logo" class="logo" />
+    <h1>Estado de Servidores</h1>
+  </header>
 
-header {
-  text-align: center;
-  margin-top: 10px;
-}
+  <!-- Menú superior -->
+  <div id="menu-superior">
+    <div class="menu-item" onclick="location.href='index.html'">
+      Inicio
+      <div class="descripcion">Volver a la página principal</div>
+    </div>
 
-h1 {
-  font-size: 1.8rem;
-  margin: 0 0 20px;
-}
+    <div class="menu-item" onclick="location.href='estado.html'">
+      Estado
+      <div class="descripcion">Estado de los servidores</div>
+    </div>
 
-.logo {
-  width: 160px;
-  height: auto;
-  display: block;
-  margin: 0 auto 10px auto;
-}
+    <div class="menu-item" onclick="window.open('https://discord.gg/tu-servidor', '_blank')">
+      Discord
+      <div class="descripcion">Únete a nuestra comunidad</div>
+    </div>
 
-#estado {
-  position: relative;
-  width: 90%;
-  max-width: 640px;
-  height: auto; /* cambiar a auto para que se ajuste */
-  margin: 20px auto 40px;
-  min-height: 300px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 25px;
-}
+    <div class="menu-item tienda" onclick="alert('La tienda estará disponible pronto!')">
+      Tienda
+      <div class="descripcion proximamente">Próximamente</div>
+    </div>
+  </div>
 
-/* Cards base */
-.card {
-  background: #222;
-  border-radius: 12px;
-  padding: 25px;
-  text-align: center;
-  border: 3px solid #444;
-  box-shadow: none;
-  transition: transform 0.2s ease-in-out, border-color 0.3s, box-shadow 0.3s;
-  width: 180px;
-  cursor: default;
-  font-weight: bold;
-  font-size: 1.1rem;
-  user-select: none;
+  <main id="estado">
+    <div class="card" id="proxy">
+      Proxy<br><span class="estado">Cargando...</span>
+    </div>
+    <div class="card" id="server1">
+      Lobby<br><span class="estado">Cargando...</span>
+    </div>
+    <div class="card" id="server2">
+      BoxPvP<br><span class="estado">Cargando...</span>
+    </div>
+  </main>
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
+  <button onclick="location.href='index.html'">Volver al inicio</button>
 
-/* Cambios por estado */
-.card.online {
-  border-color: #00ff88;
-  box-shadow: 0 0 12px #00ff88aa;
-}
-
-.card.offline {
-  border-color: #ff5555;
-  box-shadow: 0 0 12px #ff5555aa;
-}
-
-.card.online:hover {
-  box-shadow: 0 0 20px #00ff88cc;
-}
-
-.card.offline:hover {
-  box-shadow: 0 0 20px #ff5555cc;
-}
-
-/* Quitar posiciones absolutas para que sea flex */
-#proxy, #server1, #server2 {
-  position: static !important;
-  transform: none !important;
-  bottom: auto !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-}
-
-/* Líneas de conexión (se pueden ocultar en móvil) */
-#estado::before,
-#estado::after,
-#server1::before,
-#server2::before {
-  display: none;
-}
-
-/* Texto de estado */
-.estado.online {
-  color: #00ff88;
-}
-
-.estado.offline {
-  color: #ff5555;
-}
-
-/* Responsive para móviles */
-@media (min-width: 641px) {
-  #estado::before {
-    content: "";
-    position: absolute;
-    top: 140px;
-    left: 50%;
-    width: 5px;
-    height: 150px;
-    background: #00ff87aa;
-    transform: translateX(-50%);
-    z-index: 0;
-    border-radius: 2px;
-  }
-
-  #estado::after {
-    content: "";
-    position: absolute;
-    top: 290px;
-    left: 80px;
-    width: 480px;
-    height: 5px;
-    background: #00ff88cc;
-    z-index: 0;
-    border-radius: 2px;
-  }
-
-  #server1::before,
-  #server2::before {
-    content: "";
-    position: absolute;
-    top: -80px;
-    width: 5px;
-    height: 80px;
-    background: #00ff88cc;
-    z-index: 0;
-    border-radius: 2px;
-  }
-
-  #server1::before {
-    left: 120%;
-    transform-origin: top left;
-    transform: rotate(35deg);
-  }
-
-  #server2::before {
-    right: 120%;
-    transform-origin: top right;
-    transform: rotate(-35deg);
-  }
-}
-
-@media (max-width: 600px) {
-  body {
-    padding-top: 60px;
-  }
-
-  header .logo {
-    width: 120px;
-  }
-
-  h1 {
-    font-size: 1.3rem;
-  }
-
-  .card {
-    width: 90%;
-    font-size: 1rem;
-    padding: 20px;
-  }
-
-  #estado {
-    height: auto;
-    margin: 15px auto 30px;
-  }
-}
+  <script src="script.js"></script>
+</body>
+</html>
