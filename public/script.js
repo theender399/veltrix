@@ -40,7 +40,7 @@ async function cargarEstado() {
 
       let consolaHTML = '';
       if (isAuthenticated && srv.online) {
-        consolaHTML = ` <a href="${id}.html" class="consola-link" style="color:#007bff; text-decoration:none; font-weight:bold; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">[Console]</a>`;
+        consolaHTML = ` <a href="/${id}/" class="consola-link" style="color:#007bff; text-decoration:none; font-weight:bold; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">[Console]</a>`;
       }
 
       container.innerHTML = `
