@@ -5,6 +5,80 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inicio - Veltrix</title>
   <link rel="stylesheet" href="inicio.css" />
+  <style>
+    /* Barra superior fija */
+    #menu-superior {
+      display: flex;
+      background: #222;
+      padding: 10px 20px;
+      justify-content: center;
+      gap: 25px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.7);
+    }
+
+    .menu-item {
+      color: #00ffaa;
+      cursor: pointer;
+      font-weight: bold;
+      position: relative;
+      padding: 6px 12px;
+      border-radius: 8px;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    .menu-item:hover {
+      background-color: #00ffaa22;
+    }
+
+    .descripcion {
+      font-size: 0.7rem;
+      color: #55ffaa;
+      position: absolute;
+      top: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      user-select: none;
+    }
+    .menu-item:hover .descripcion {
+      opacity: 1;
+    }
+
+    .tienda .proximamente {
+      color: #ff4444;
+      font-weight: bold;
+      font-size: 0.7rem;
+      margin-top: 3px;
+      pointer-events: none;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #00ffaa;
+      padding-top: 60px; /* para no tapar contenido con el menú fijo */
+      text-align: center;
+    }
+
+    header .logo {
+      width: 160px;
+      height: auto;
+      margin-bottom: 10px;
+    }
+
+    main {
+      margin-top: 40px;
+      font-size: 1.2rem;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -13,7 +87,7 @@
   </header>
 
   <!-- Menú superior -->
-  <div id="menu-superior">
+  <nav id="menu-superior">
     <div class="menu-item" onclick="location.href='estado.html'">
       Estado
       <div class="descripcion">Estado de los servidores</div>
@@ -28,7 +102,7 @@
       Tienda
       <div class="descripcion proximamente">Próximamente</div>
     </div>
-  </div>
+  </nav>
 
   <main>
     <p>Contenido principal de la página de inicio aquí.</p>
