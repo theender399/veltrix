@@ -1,44 +1,44 @@
 async function cargarEstado() {
   try {
+    const auth0 = await auth0ClientPromise;
+    const isAuthenticated = await auth0.isAuthenticated();
+
     const res = await fetch('/.netlify/functions/estado');
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
 
     for (const id in data) {
       const srv = data[id];
-      const card = document.getElementById(id);
-      if (!card) continue;
+      const container = document.getElementById(id);
+      if (!container) continue;
 
-      // Remover clases previas y poner la correcta
-      card.classList.remove('online', 'offline');
-      card.classList.add(srv.online ? 'online' : 'offline');
+      // Limpiar contenido para regenerar
+      container.innerHTML = '';
+      container.classList.remove('online', 'offline');
+      container.classList.add(srv.online ? 'online' : 'offline');
 
-      // Buscar o crear elementos internos
-      let nombreSpan = card.querySelector('.nombre');
-      if (!nombreSpan) {
-        nombreSpan = document.createElement('span');
-        nombreSpan.className = 'nombre';
-        card.prepend(nombreSpan);
+      // Crear contenido de la tarjeta
+      const contenido = `
+        <span class="nombre">${srv.name || id}</span><br>
+        <span class="estado ${srv.online ? 'online' : 'offline'}">
+          ${srv.online ? '🟢 Online' : '🔴 Offline'}
+        </span><br>
+        <span class="jugadores">${srv.online ? `Jugadores: ${srv.players}/${srv.max}` : ''}</span>
+      `;
+
+      if (isAuthenticated) {
+        // Si está logeado, el container es un enlace clickeable
+        const link = document.createElement('a');
+        link.href = `${id}.html`;
+        link.style.textDecoration = 'none';
+        link.className = 'server-card-link';
+        link.innerHTML = contenido;
+        container.appendChild(link);
+      } else {
+        // Si no está logeado, mostrar tarjeta pero sin enlace
+        container.innerHTML = contenido + 
+          '<br><span style="color:red; font-style: italic;">Inicie sesión para acceder</span>';
       }
-
-      let estadoSpan = card.querySelector('.estado');
-      if (!estadoSpan) {
-        estadoSpan = document.createElement('span');
-        estadoSpan.className = 'estado';
-        nombreSpan.after(document.createElement('br'));
-        nombreSpan.after(estadoSpan);
-      }
-      estadoSpan.className = `estado ${srv.online ? 'online' : 'offline'}`;
-      estadoSpan.textContent = srv.online ? '🟢 Online' : '🔴 Offline';
-
-      let jugadoresSpan = card.querySelector('.jugadores');
-      if (!jugadoresSpan) {
-        jugadoresSpan = document.createElement('span');
-        jugadoresSpan.className = 'jugadores';
-        estadoSpan.after(document.createElement('br'));
-        estadoSpan.after(jugadoresSpan);
-      }
-      jugadoresSpan.textContent = srv.online ? `Jugadores: ${srv.players}/${srv.max}` : '';
     }
   } catch (error) {
     console.error('Error cargando estado:', error);
