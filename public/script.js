@@ -7,38 +7,30 @@ async function cargarEstado() {
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
 
-    for (const id in data) {
+    for (const id of ['proxy', 'lobby', 'fastfarm']) {
       const srv = data[id];
       const container = document.getElementById(id);
       if (!container) continue;
 
       container.innerHTML = '';
       container.classList.remove('online', 'offline');
-      container.classList.add(srv.online ? 'online' : 'offline');
+      container.classList.add(srv && srv.online ? 'online' : 'offline');
 
-      const contenidoBase = `
-        <span class="nombre">${srv.name || id}</span><br>
-        <span class="estado ${srv.online ? 'online' : 'offline'}">
-          ${srv.online ? '🟢 Online' : '🔴 Offline'}
-        </span><br>
-        <span class="jugadores">${srv.online ? `Jugadores: ${srv.players}/${srv.max}` : ''}</span>
-      `;
+      const nombreHTML = `<span class="nombre" style="font-weight:bold; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1.2rem;">${srv?.name || id}</span>`;
+      const estadoHTML = `<span class="estado ${srv && srv.online ? 'online' : 'offline'}" style="font-family: monospace;">${srv && srv.online ? '🟢 Online' : '🔴 Offline'}</span>`;
+      const jugadoresHTML = `<span class="jugadores" style="font-family: monospace;">${srv && srv.online ? `Jugadores: ${srv.players}/${srv.max}` : ''}</span>`;
 
-      if (isAuthenticated) {
-        // Usuario autenticado: la tarjeta es un enlace clickeable que lleva a la consola
-        const link = document.createElement('a');
-        link.href = `${id}.html`;
-        link.style.textDecoration = 'none';
-        link.className = 'server-card-link';
-        link.innerHTML = contenidoBase;
-        container.appendChild(link);
-      } else {
-        // Usuario NO autenticado: mostrar solo la info sin enlace
-        const card = document.createElement('div');
-        card.className = 'server-card';
-        card.innerHTML = contenidoBase;
-        container.appendChild(card);
+      let consolaHTML = '';
+      if (isAuthenticated && srv && srv.online) {
+        consolaHTML = ` <a href="${id}.html" class="consola-link" style="color:#007bff; text-decoration:none; font-weight:bold; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">[Console]</a>`;
       }
+
+      container.innerHTML = `
+        ${nombreHTML} <br>
+        ${estadoHTML} <br>
+        ${jugadoresHTML}
+        ${consolaHTML}
+      `;
     }
   } catch (error) {
     console.error('Error cargando estado:', error);
