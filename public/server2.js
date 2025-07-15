@@ -1,64 +1,30 @@
+// server2.js
 
-async function cargarEstado() {
-  try {
-    const auth0 = await auth0ClientPromise;
-    const isAuthenticated = await auth0.isAuthenticated();
+document.addEventListener('DOMContentLoaded', () => {
+  const logOutput = document.getElementById('log-output');
 
-    const res = await fetch('/.netlify/functions/estado');
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    const data = await res.json();
+  if (!logOutput) return;
 
-    const servidores = ['proxy', 'server1', 'server2'];
+  // Texto inicial de carga
+  logOutput.textContent = 'Cargando registros del servidor FastFarm...';
 
-    for (const id of servidores) {
-      const srv = data[id];
-      const container = document.getElementById(id);
-      if (!container) continue;
+  // Simulación de logs que llegan en tiempo real
+  let contador = 1;
 
-      container.innerHTML = '';
-      container.classList.remove('online', 'offline');
+  const intervalId = setInterval(() => {
+    const online = Math.random() > 0.2;
+    const estado = online ? 'ONLINE ✅' : 'OFFLINE ❌';
+    const timestamp = new Date().toLocaleTimeString();
 
-      if (srv && srv.online) {
-        container.classList.add('online');
-      } else {
-        container.classList.add('offline');
-      }
+    logOutput.textContent += `\n[${timestamp}] FastFarm está ${estado} - Log #${contador++}`;
 
-      if (!srv) {
-        container.innerHTML = `<span style="color:red; font-family: monospace;">Servidor no disponible</span>`;
-        continue;
-      }
+    // Auto scroll hacia abajo
+    logOutput.scrollTop = logOutput.scrollHeight;
 
-      const nombreMapa = {
-        proxy: 'Proxy',
-        server1: 'Lobby',
-        server2: 'Fastfarm'
-      };
-
-      const nombreHTML = `<span class="nombre" style="font-weight:bold; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1.2rem;">${nombreMapa[id] || id}</span>`;
-      const estadoHTML = `<span class="estado ${srv.online ? 'online' : 'offline'}" style="font-family: monospace;">${srv.online ? '🟢 Online' : '🔴 Offline'}</span>`;
-      const jugadoresHTML = `<span class="jugadores" style="font-family: monospace;">${srv.online ? `Jugadores: ${srv.players}/${srv.max}` : ''}</span>`;
-
-      let consolaHTML = '';
-      if (isAuthenticated && srv.online) {
-        consolaHTML = ` <a href="/${id}/" class="consola-link" style="color:#007bff; text-decoration:none; font-weight:bold; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">[Console]</a>`;
-      }
-
-      container.innerHTML = `
-        ${nombreHTML} <br>
-        ${estadoHTML} <br>
-        ${jugadoresHTML}
-        ${consolaHTML}
-      `;
+    // Opcional: para no llenar infinitamente, para después de 20 logs
+    if (contador > 20) {
+      clearInterval(intervalId);
+      logOutput.textContent += '\n--- Fin de los registros simulados ---';
     }
-  } catch (error) {
-    console.error('Error cargando estado:', error);
-    const contenedor = document.getElementById('estado');
-    if (contenedor) {
-      contenedor.innerHTML = `<p style="color:red;">No se pudo cargar el estado. Intenta recargar la página.</p>`;
-    }
-  }
-}
-
-cargarEstado();
-setInterval(cargarEstado, 60000);
+  }, 1500);
+});
