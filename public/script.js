@@ -12,35 +12,32 @@ async function cargarEstado() {
       const container = document.getElementById(id);
       if (!container) continue;
 
-      // Limpiar contenido para regenerar
       container.innerHTML = '';
       container.classList.remove('online', 'offline');
       container.classList.add(srv.online ? 'online' : 'offline');
 
-      // Crear contenido de la tarjeta
-      // Consola será un link o texto segun autenticacion
-      const consolaHTML = isAuthenticated
-        ? `<a href="${id}.html" class="consola-link" style="color:#007bff; text-decoration:none;">Acceder</a>`
-        : `<span style="color:red; font-style: italic;">Inicie sesión para acceder</span>`;
-
-      const contenido = `
+      const contenidoBase = `
         <span class="nombre">${srv.name || id}</span><br>
         <span class="estado ${srv.online ? 'online' : 'offline'}">
           ${srv.online ? '🟢 Online' : '🔴 Offline'}
         </span><br>
-        <span class="jugadores">${srv.online ? `Jugadores: ${srv.players}/${srv.max}` : ''}</span><br>
-        <span class="consola">Consola: ${srv.online ? consolaHTML : ''}</span>
+        <span class="jugadores">${srv.online ? `Jugadores: ${srv.players}/${srv.max}` : ''}</span>
       `;
 
       if (isAuthenticated) {
-        // Si está logeado, el container es un enlace clickeable pero solo el contenido, no el link entero
+        // Usuario autenticado: la tarjeta es un enlace clickeable que lleva a la consola
+        const link = document.createElement('a');
+        link.href = `${id}.html`;
+        link.style.textDecoration = 'none';
+        link.className = 'server-card-link';
+        link.innerHTML = contenidoBase;
+        container.appendChild(link);
+      } else {
+        // Usuario NO autenticado: mostrar solo la info sin enlace
         const card = document.createElement('div');
         card.className = 'server-card';
-        card.innerHTML = contenido;
+        card.innerHTML = contenidoBase;
         container.appendChild(card);
-      } else {
-        // Si no está logeado, mostrar tarjeta con aviso
-        container.innerHTML = contenido;
       }
     }
   } catch (error) {
