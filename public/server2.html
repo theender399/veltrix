@@ -8,38 +8,38 @@
   <style>
     main {
       padding: 20px;
-      text-align: left;
       max-width: 900px;
-      margin: 80px auto 40px;
+      margin: 100px auto 40px;
       background: #1a1a1a;
       border-radius: 10px;
       box-shadow: 0 0 10px #00ffaa33;
       font-family: monospace;
       color: #00ffaa;
+    }
+
+    #consola-output {
       white-space: pre-wrap;
       overflow-y: auto;
-      min-height: 300px;
+      max-height: 300px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #00ffaa55;
+      padding-bottom: 10px;
     }
 
-    #consola-placeholder {
-      font-style: italic;
-      color: #999;
-    }
-
-    .btn-volver {
-      background: #222;
-      border: 2px solid #00ffaa;
+    #comando {
+      width: 100%;
+      padding: 10px;
+      background: #111;
+      border: 1px solid #00ffaa99;
       color: #00ffaa;
-      padding: 10px 20px;
-      font-weight: bold;
-      border-radius: 12px;
-      cursor: pointer;
-      margin: 20px auto;
-      display: block;
-      transition: background-color 0.3s ease;
+      font-family: monospace;
+      font-size: 1rem;
+      border-radius: 6px;
     }
-    .btn-volver:hover {
-      background-color: #00ffaa22;
+
+    #comando:disabled {
+      background: #333;
+      color: #888;
     }
   </style>
 </head>
@@ -57,26 +57,41 @@
     <div id="auth-menu-container"></div>
   </nav>
 
-  <main id="consola">
-    <div id="consola-placeholder">Cargando consola...</div>
+  <main>
+    <div id="consola-output">Cargando consola...</div>
+    <input type="text" id="comando" placeholder="Escribe un comando y presiona Enter..." disabled />
   </main>
 
-  <button class="btn-volver" onclick="location.href='/estado'">← Volver al estado</button>
+  <button onclick="location.href='/estado'">← Volver al estado</button>
 
   <script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
   <script src="/auth.js"></script>
   <script>
-    const consola = document.getElementById('consola');
+    const consola = document.getElementById('consola-output');
+    const input = document.getElementById('comando');
 
     auth0ClientPromise.then(async (auth0) => {
       const isAuthenticated = await auth0.isAuthenticated();
       if (!isAuthenticated) {
-        consola.innerHTML = '<p style="color:red;">Debes estar logueado para acceder a esta consola.</p>';
+        consola.innerHTML = '⚠️ Debes estar logueado para acceder a esta consola.';
+        input.disabled = true;
         return;
       }
 
-      // Simulación de logs o comandos
-      consola.innerHTML = `Fastfarm :: Consola Activa\n--------------------------\n> Bienvenido, ${await (await auth0.getUser()).name}\n\n[Esperando eventos del servidor...]\n\n`;
+      const user = await auth0.getUser();
+      consola.textContent = `Fastfarm Console\n------------------\nBienvenido, ${user.name || 'Usuario'}\n\n[Esperando comandos...]\n`;
+      input.disabled = false;
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const cmd = input.value.trim();
+          if (cmd !== '') {
+            consola.textContent += `\n> ${cmd}\n[Comando enviado a Fastfarm (simulado)]\n`;
+            input.value = '';
+            consola.scrollTop = consola.scrollHeight;
+          }
+        }
+      });
     });
   </script>
 </body>
