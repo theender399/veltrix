@@ -71,7 +71,7 @@
       font-family: Arial, sans-serif;
       background: #111;
       color: #00ffaa;
-      padding-top: 60px;
+      padding-top: 60px; /* para no tapar contenido con el menú fijo */
       text-align: center;
     }
 
@@ -121,10 +121,10 @@
   </main>
 
   <script>
-    // Detectar página actual y resaltar
-    const ruta = location.pathname.replace('/', '') || 'inicio';
-    const activo = document.querySelector(`[data-pagina="${ruta}"]`);
-    if (activo) activo.classList.add('activo');
+    // Detectar la página actual y marcar como activa
+    const path = location.pathname.replace(/^\/+|\/+$/g, '') || 'inicio';
+    const item = document.querySelector(`[data-pagina="${path}"]`);
+    if (item) item.classList.add('activo');
   </script>
 </body>
 </html>
