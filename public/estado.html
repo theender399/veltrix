@@ -6,7 +6,6 @@
   <title>Estado de Servidores Minecraft</title>
   <link rel="stylesheet" href="estado.css" />
   <style>
-    /* Barra superior fija igual que en inicio.css */
     #menu-superior {
       display: flex;
       background: #222;
@@ -60,7 +59,7 @@
       margin-top: 3px;
       pointer-events: none;
     }
-    /* Contenedor para login/logout */
+
     #auth-menu-container {
       margin-left: auto;
       color: #00ffaa;
@@ -82,7 +81,6 @@
     #auth-menu-container button:hover {
       background-color: #00ffaa44;
     }
-    /* Avatar usuario */
     .user-avatar {
       width: 32px;
       height: 32px;
@@ -101,17 +99,20 @@
       font-family: Arial, sans-serif;
       background: #111;
       color: #00ffaa;
-      padding-top: 60px; /* para no tapar contenido con el menú fijo */
+      padding-top: 60px;
       text-align: center;
     }
+
     header .logo {
       width: 160px;
       height: auto;
       margin-bottom: 10px;
     }
+
     main {
       margin-top: 40px;
     }
+
     button {
       background: #222;
       border: 2px solid #00ffaa;
@@ -152,7 +153,6 @@
       Tienda
       <div class="descripcion proximamente">Próximamente</div>
     </div>
-
     <div id="auth-menu-container"></div>
   </nav>
 
@@ -170,10 +170,11 @@
 
   <button onclick="location.href='/inicio'">Volver al inicio</button>
 
+  <!-- Scripts -->
   <script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
   <script src="auth.js"></script>
+  <script src="script.js"></script>
   <script>
-    // Resaltar menú
     const path = location.pathname.replace(/^\/+|\/+$/g, '') || 'inicio';
     const item = document.querySelector(`[data-pagina="${path}"]`);
     if (item) item.classList.add('activo');
