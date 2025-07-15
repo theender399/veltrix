@@ -96,6 +96,11 @@
   <!-- Menú superior -->
   <nav id="menu-superior">
     <div class="menu-item" data-pagina="inicio" onclick="location.href='/inicio'">
+      Inicio
+      <div class="descripcion">Volver a la página principal</div>
+    </div>
+
+    <div class="menu-item" data-pagina="estado" onclick="location.href='/estado'">
       Estado
       <div class="descripcion">Estado de los servidores</div>
     </div>
@@ -116,7 +121,7 @@
   </main>
 
   <script>
-    // Resalta el ítem de menú correspondiente a la ruta actual
+    // Detectar página actual y resaltar
     const ruta = location.pathname.replace('/', '') || 'inicio';
     const activo = document.querySelector(`[data-pagina="${ruta}"]`);
     if (activo) activo.classList.add('activo');
