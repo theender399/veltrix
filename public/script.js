@@ -7,7 +7,7 @@ async function cargarEstado() {
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
 
-    const servidores = ['proxy', 'lobby', 'fastfarm'];
+    const servidores = ['proxy', 'server1', 'server2'];
 
     for (const id of servidores) {
       const srv = data[id];
@@ -28,7 +28,13 @@ async function cargarEstado() {
         continue;
       }
 
-      const nombreHTML = `<span class="nombre" style="font-weight:bold; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1.2rem;">${srv.name || id}</span>`;
+      const nombreMapa = {
+        proxy: 'Proxy',
+        server1: 'Lobby',
+        server2: 'Fastfarm'
+      };
+
+      const nombreHTML = `<span class="nombre" style="font-weight:bold; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1.2rem;">${nombreMapa[id] || id}</span>`;
       const estadoHTML = `<span class="estado ${srv.online ? 'online' : 'offline'}" style="font-family: monospace;">${srv.online ? '🟢 Online' : '🔴 Offline'}</span>`;
       const jugadoresHTML = `<span class="jugadores" style="font-family: monospace;">${srv.online ? `Jugadores: ${srv.players}/${srv.max}` : ''}</span>`;
 
