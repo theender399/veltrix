@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Veltrix - Autenticación</title>
+  <style>
+    /* Reset y básico */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #00ffaa;
+      padding-top: 60px;
+      text-align: center;
+    }
+    header .logo {
+      width: 160px;
+      height: auto;
+      margin-bottom: 10px;
+    }
+    main {
+      margin-top: 40px;
+      font-size: 1.2rem;
+    }
+
+    /* Menú hamburguesa */
+    #menu-superior {
+      background: #222;
+      color: #00ffaa;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.7);
+    }
+    #menu-superior .logo-menu {
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1.3rem;
+      user-select: none;
+    }
+    #hamburger {
+      cursor: pointer;
+      width: 30px;
+      height: 25px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    #hamburger div {
+      height: 4px;
+      background: #00ffaa;
+      border-radius: 2px;
+    }
+
+    nav {
+      position: fixed;
+      top: 60px;
+      right: 0;
+      background: #222;
+      width: 220px;
+      height: calc(100% - 60px);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      padding-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      z-index: 1001;
+    }
+    nav.active {
+      transform: translateX(0);
+    }
+    nav a, nav button {
+      color: #00ffaa;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: #222;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    nav a:hover, nav button:hover {
+      background-color: #00ffaa22;
+    }
+
+    /* Perfil usuario */
+    #user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 20px 10px 20px;
+      border-bottom: 1px solid #00ffaa44;
+    }
+    #user-info img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    #user-info span {
+      font-weight: bold;
+    }
+
+    /* Responsive */
+    @media(min-width: 600px){
+      #hamburger {
+        display: none;
+      }
+      nav {
+        position: static;
+        transform: none !important;
+        flex-direction: row;
+        height: auto;
+        width: auto;
+        padding: 0;
+        background: transparent;
+        gap: 25px;
+      }
+      nav a, nav button {
+        padding: 6px 12px;
+        background: transparent;
+        border-radius: 0;
+      }
+      #user-info {
+        border: none;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <img src="imagenes/logo.png" alt="Logo Veltrix" class="logo" />
+</header>
+
+<div id="menu-superior">
+  <div class="logo-menu">Veltrix</div>
+  <div id="hamburger" aria-label="Abrir menú" tabindex="0">
+    <div></div><div></div><div></div>
+  </div>
+</div>
+
+<nav id="nav-menu" aria-hidden="true">
+  <!-- Usuario info se inserta aquí con JS -->
+  <div id="user-info" style="display:none;">
+    <img id="user-picture" src="" alt="Foto usuario" />
+    <span id="user-name"></span>
+  </div>
+  <a href="/inicio" class="nav-link">Inicio</a>
+  <a href="#" id="nav-estado" class="nav-link">Estado</a>
+  <a href="https://discord.gg/tu-servidor" target="_blank" rel="noopener noreferrer" class="nav-link">Discord</a>
+  <button class="tienda" onclick="alert('La tienda estará disponible pronto!')">Tienda <span style="color:#ff4444; font-weight:bold; margin-left:5px;">Próximamente</span></button>
+  <button id="btn-login" style="display:none;">Login</button>
+  <button id="btn-logout" style="display:none;">Cerrar sesión</button>
+</nav>
+
+<main>
+  <h1>Bienvenido a Veltrix</h1>
+  <p>Contenido principal de la página de inicio aquí.</p>
+</main>
+
+<script src="https://cdn.auth0.com/js/auth0-spa-js/1.28/auth0-spa-js.production.js"></script>
+<script>
+  // Variables UI
+  const hamburger = document.getElementById('hamburger');
+  const navMenu = document.getElementById('nav-menu');
+  const btnLogin = document.getElementById('btn-login');
+  const btnLogout = document.getElementById('btn-logout');
+  const userInfo = document.getElementById('user-info');
+  const userName = document.getElementById('user-name');
+  const userPicture = document.getElementById('user-picture');
+  const navEstado = document.getElementById('nav-estado');
+
+  // Toggle menú hamburguesa
+  hamburger.addEventListener('click', () => {
+    const expanded = navMenu.classList.toggle('active');
+    navMenu.setAttribute('aria-hidden', !expanded);
+  });
+
+  // Close menu on link click (for small screens)
+  navMenu.querySelectorAll('.nav-link, button').forEach(el => {
+    el.addEventListener('click', () => {
+      navMenu.classList.remove('active');
+      navMenu.setAttribute('aria-hidden', 'true');
+    });
+  });
+
+  // Auth0 init
+  let auth0 = null;
+  const domain = "dev-gfo057i2wbpzipno.us.auth0.com";
+  const clientId = "SqvyN9CZm22K6uZsuDT7C9rH5JHe59Mz";
+
+  window.onload = async () => {
+    auth0 = await createAuth0Client({
+      domain: domain,
+      client_id: clientId,
+      cacheLocation: 'localstorage',
+      useRefreshTokens: true
+    });
+
+    // Handle redirect callback
+    if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+      await auth0.handleRedirectCallback();
+      window.history.replaceState({}, document.title, "/inicio");
+    }
+
+    updateUI();
+  };
+
+  async function updateUI() {
+    const isAuthenticated = await auth0.isAuthenticated();
+
+    if (isAuthenticated) {
+      const user = await auth0.getUser();
+      btnLogin.style.display = "none";
+      btnLogout.style.display = "inline-block";
+      userInfo.style.display = "flex";
+      userName.textContent = user.name || user.nickname || user.email || "Usuario";
+      userPicture.src = user.picture || "https://via.placeholder.com/36";
+      navEstado.href = "/estado";
+      navEstado.style.pointerEvents = "auto";
+      navEstado.style.opacity = "1";
+    } else {
+      btnLogin.style.display = "inline-block";
+      btnLogout.style.display = "none";
+      userInfo.style.display = "none";
+      navEstado.href = "#";
+      navEstado.style.pointerEvents = "none";
+      navEstado.style.opacity = "0.6";
+    }
+  }
+
+  btnLogin.addEventListener('click', () => {
+    auth0.loginWithRedirect({
+      redirect_uri: window.location.origin + "/inicio"
+    });
+  });
+
+  btnLogout.addEventListener('click', () => {
+    auth0.logout({
+      returnTo: window.location.origin + "/inicio"
+    });
+  });
+
+  // Bloqueo de acceso si no está logeado en Estado (cuando se usa link)
+  navEstado.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const isAuthenticated = await auth0.isAuthenticated();
+    if (isAuthenticated) {
+      window.location.href = "/estado";
+    } else {
+      alert("Debes iniciar sesión para acceder al estado de los servidores.");
+    }
+  });
+</script>
+
+</body>
+</html>
