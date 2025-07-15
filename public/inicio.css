@@ -1,7 +1,191 @@
-/* Contenedor del menú arriba */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #111;
+  color: #00ffaa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
+}
+
+header {
+  text-align: center;
+  margin-top: 20px;
+}
+
+h1 {
+  margin-top: 10px;
+  font-size: 1.8rem;
+}
+
+.logo {
+  width: 160px;
+  height: auto;
+  display: block;
+  margin: 0 auto 10px auto;
+}
+
+#estado {
+  position: relative;
+  width: 640px;
+  height: 400px;
+  margin: 40px auto;
+}
+
+/* Cards pirámide base */
+
+.card {
+  position: absolute;
+  background: #222;
+  border-radius: 12px;
+  padding: 25px;
+  text-align: center;
+  border: 3px solid #444; /* gris neutro mientras carga */
+  box-shadow: none;
+  transition: transform 0.2s ease-in-out, border-color 0.3s, box-shadow 0.3s;
+  width: 180px;
+  cursor: default;
+  font-weight: bold;
+  font-size: 1.1rem;
+  user-select: none;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Cambios por estado */
+
+.card.online {
+  border-color: #00ff88;
+  box-shadow: 0 0 12px #00ff88aa;
+}
+
+.card.offline {
+  border-color: #ff5555;
+  box-shadow: 0 0 12px #ff5555aa;
+}
+
+.card.online:hover {
+  box-shadow: 0 0 20px #00ff88cc;
+}
+
+.card.offline:hover {
+  box-shadow: 0 0 20px #ff5555cc;
+}
+
+/* Posiciones */
+
+#proxy {
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+#server1 {
+  bottom: -200px;
+  left: 10px;
+}
+
+#server2 {
+  bottom: -200px;
+  right: 10px;
+}
+
+/* Líneas de conexión */
+
+#estado::before {
+  content: "";
+  position: absolute;
+  top: 140px;
+  left: 50%;
+  width: 5px;
+  height: 150px;
+  background: #00ff87aa;
+  transform: translateX(-50%);
+  z-index: 0;
+  border-radius: 2px;
+}
+
+#estado::after {
+  content: "";
+  position: absolute;
+  top: 290px;
+  left: 80px;
+  width: 480px;
+  height: 5px;
+  background: #00ff88cc;
+  z-index: 0;
+  border-radius: 2px;
+}
+
+#server1::before,
+#server2::before {
+  content: "";
+  position: absolute;
+  top: -80px;
+  width: 5px;
+  height: 80px;
+  background: #00ff88cc;
+  z-index: 0;
+  border-radius: 2px;
+}
+
+#server1::before {
+  left: 120%;
+  transform-origin: top left;
+  transform: rotate(35deg);
+}
+
+#server2::before {
+  right: 120%;
+  transform-origin: top right;
+  transform: rotate(-35deg);
+}
+
+/* Texto de estado */
+
+.estado.online {
+  color: #00ff88;
+}
+
+.estado.offline {
+  color: #ff5555;
+}
+
+/* Responsive móvil */
+
+@media (max-width: 768px) {
+  header {
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .logo {
+    width: 120px;
+    margin: 0 auto 10px auto;
+  }
+
+  h1 {
+    font-size: 1.3rem;
+    margin-top: 10px;
+  }
+
+  #estado {
+    transform: scale(0.85);
+    transform-origin: top center;
+  }
+}
+
+/* --- Menú superior con botones --- */
+
 #menu-superior {
   position: relative;
-  width: 640px; /* igual que #estado para alinear */
+  width: 640px;
   margin: 20px auto 40px auto;
   display: flex;
   justify-content: space-around;
@@ -9,7 +193,6 @@
   z-index: 10;
 }
 
-/* Cada botón + descripción */
 .menu-item {
   background: #222;
   border: 3px solid #444;
@@ -34,7 +217,6 @@
   box-shadow: 0 0 12px #00ff88aa;
 }
 
-/* Texto pequeño descriptivo */
 .menu-item .descripcion {
   font-weight: normal;
   font-size: 0.8rem;
@@ -42,7 +224,6 @@
   color: #66ffbbaa;
 }
 
-/* Texto “próximamente” en rojo para tienda */
 .menu-item.tienda .proximamente {
   color: #ff5555;
   font-weight: bold;
