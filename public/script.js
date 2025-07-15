@@ -1,6 +1,6 @@
 async function cargarEstado() {
   try {
-    const res = await fetch('/.netlify/functions/estado'); // ⚠️ cambio aquí
+    const res = await fetch('/.netlify/functions/estado');
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
 
