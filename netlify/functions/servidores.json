@@ -1,0 +1,20 @@
+[
+  {
+    "id": "proxy",
+    "nombre": "Bungeecord",
+    "host": "45.58.127.189",
+    "puerto": 25565
+  },
+  {
+    "id": "server1",
+    "nombre": "Lobby",
+    "host": "172.93.110.69",
+    "puerto": 25569
+  },
+  {
+    "id": "server2",
+    "nombre": "FastFarm",
+    "host": "172.93.110.69",
+    "puerto": 25568
+  }
+]
