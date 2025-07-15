@@ -1,7 +1,8 @@
 const auth0ClientPromise = createAuth0Client({
   domain: 'dev-gfo057i2wbpzipno.us.auth0.com',
   client_id: 'SqvyN9CZm22K6uZsuDT7C9rH5JHe59Mz',
-  redirect_uri: window.location.origin
+  // Importante: que sea EXACTAMENTE tu dominio Netlify
+  redirect_uri: 'https://veltrixstatus.netlify.app/estado' 
 });
 
 async function updateUI() {
@@ -26,7 +27,7 @@ async function updateUI() {
 
     const logoutBtn = document.createElement("button");
     logoutBtn.textContent = "Cerrar sesión";
-    logoutBtn.onclick = () => auth0.logout({ returnTo: window.location.origin });
+    logoutBtn.onclick = () => auth0.logout({ returnTo: 'https://veltrixstatus.netlify.app' });
 
     container.appendChild(avatar);
     container.appendChild(name);
@@ -37,15 +38,19 @@ async function updateUI() {
     loginBtn.onclick = () => auth0.loginWithRedirect();
     container.appendChild(loginBtn);
   }
+
+  return isAuthenticated;
 }
 
 window.onload = async () => {
   const auth0 = await auth0ClientPromise;
 
-  if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+  // Maneja el callback solo en /estado (tu redirect_uri)
+  if (window.location.pathname === "/estado" && window.location.search.includes("code=") && window.location.search.includes("state=")) {
     await auth0.handleRedirectCallback();
+    // Limpia URL para evitar que se repita el callback
     window.history.replaceState({}, document.title, "/estado");
   }
 
-  updateUI();
+  await updateUI();
 };
