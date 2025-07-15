@@ -9,16 +9,36 @@ async function cargarEstado() {
       const card = document.getElementById(id);
       if (!card) continue;
 
+      // Remover clases previas y poner la correcta
       card.classList.remove('online', 'offline');
       card.classList.add(srv.online ? 'online' : 'offline');
 
-      card.innerHTML = `
-        ${srv.nombre}<br>
-        <span class="estado ${srv.online ? 'online' : 'offline'}">
-          ${srv.online ? '🟢 Online' : '🔴 Offline'}
-        </span><br>
-        <span class="jugadores">${srv.online ? `Jugadores: ${srv.players}/${srv.max}` : ''}</span>
-      `;
+      // Buscar o crear elementos internos
+      let nombreSpan = card.querySelector('.nombre');
+      if (!nombreSpan) {
+        nombreSpan = document.createElement('span');
+        nombreSpan.className = 'nombre';
+        card.prepend(nombreSpan);
+      }
+
+      let estadoSpan = card.querySelector('.estado');
+      if (!estadoSpan) {
+        estadoSpan = document.createElement('span');
+        estadoSpan.className = 'estado';
+        nombreSpan.after(document.createElement('br'));
+        nombreSpan.after(estadoSpan);
+      }
+      estadoSpan.className = `estado ${srv.online ? 'online' : 'offline'}`;
+      estadoSpan.textContent = srv.online ? '🟢 Online' : '🔴 Offline';
+
+      let jugadoresSpan = card.querySelector('.jugadores');
+      if (!jugadoresSpan) {
+        jugadoresSpan = document.createElement('span');
+        jugadoresSpan.className = 'jugadores';
+        estadoSpan.after(document.createElement('br'));
+        estadoSpan.after(jugadoresSpan);
+      }
+      jugadoresSpan.textContent = srv.online ? `Jugadores: ${srv.players}/${srv.max}` : '';
     }
   } catch (error) {
     console.error('Error cargando estado:', error);
