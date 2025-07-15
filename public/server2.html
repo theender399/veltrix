@@ -1,1 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fastfarm - Consola</title>
+  <link rel="stylesheet" href="estado.css" />
+</head>
+<body>
+  <header>
+    <img src="/imagenes/logo.png" alt="Logo" class="logo" />
+    <h1>Consola: Fastfarm</h1>
+  </header>
 
+  <nav id="menu-superior">
+    <div class="menu-item" onclick="location.href='/inicio'">Inicio</div>
+    <div class="menu-item" onclick="location.href='/estado'">Estado</div>
+    <div class="menu-item" onclick="window.open('https://discord.gg/tu-servidor', '_blank')">Discord</div>
+    <div class="menu-item tienda" onclick="alert('La tienda estará disponible pronto!')">Tienda</div>
+    <div id="auth-menu-container"></div>
+  </nav>
+
+  <main id="contenido">
+    <p>Cargando consola...</p>
+  </main>
+
+  <button onclick="location.href='/estado'">Volver al estado</button>
+
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
+  <script src="/auth.js"></script>
+  <script>
+    const main = document.getElementById('contenido');
+
+    auth0ClientPromise.then(async auth0 => {
+      const isAuth = await auth0.isAuthenticated();
+      if (!isAuth) {
+        main.innerHTML = '<p style="color:red;">Debes estar logeado para acceder a esta página.</p>';
+        return;
+      }
+
+      // Usuario autenticado
+      const user = await auth0.getUser();
+      main.innerHTML = `
+        <h2 style="color:#00ffaa;">Bienvenido, ${user.name || 'usuario'}</h2>
+        <p>Próximamente verás aquí los logs o comandos de Fastfarm.</p>
+      `;
+    });
+  </script>
+</body>
+</html>
