@@ -3,121 +3,145 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Consola Fastfarm</title>
-  <link rel="stylesheet" href="estado.css" />
+  <title>FastFarm - Estado del Servidor</title>
+  <link rel="stylesheet" href="server2.css" />
   <style>
-    main {
-      padding: 20px;
-      max-width: 900px;
-      margin: 100px auto 40px;
-      background: #1a1a1a;
-      border-radius: 10px;
-      box-shadow: 0 0 10px #00ffaa33;
-      font-family: monospace;
-      color: #00ffaa;
-    }
-
-    #consola-output {
-      white-space: pre-wrap;
-      overflow-y: auto;
-      max-height: 300px;
-      margin-bottom: 10px;
-      border-bottom: 1px solid #00ffaa55;
-      padding-bottom: 10px;
-    }
-
-    #comando {
+    /* Menú superior */
+    #menu-superior {
+      display: flex;
+      background: #222;
+      padding: 10px 20px;
+      justify-content: center;
+      gap: 25px;
+      position: fixed;
+      top: 0;
       width: 100%;
-      padding: 10px;
-      background: #111;
-      border: 1px solid #00ffaa99;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.7);
+      align-items: center;
+    }
+    .menu-item {
       color: #00ffaa;
-      font-family: monospace;
-      font-size: 1rem;
-      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      position: relative;
+      padding: 6px 12px;
+      border-radius: 8px;
+      user-select: none;
+      transition: background-color 0.3s ease;
     }
-
-    #comando:disabled {
-      background: #333;
-      color: #888;
-      cursor: not-allowed;
+    .menu-item:hover {
+      background-color: #00ffaa22;
     }
-
-    button {
-      margin: 20px auto;
-      display: block;
+    .menu-item.activo {
+      background-color: #00ffaa44;
+      box-shadow: 0 0 6px #00ffaa99;
+    }
+    .descripcion {
+      font-size: 0.7rem;
+      color: #55ffaa;
+      position: absolute;
+      top: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      user-select: none;
+    }
+    .menu-item:hover .descripcion {
+      opacity: 1;
+    }
+    .tienda .proximamente {
+      color: #ff4444;
+      font-weight: bold;
+      font-size: 0.7rem;
+      margin-top: 3px;
+      pointer-events: none;
+    }
+    #auth-menu-container {
+      margin-left: auto;
+      color: #00ffaa;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #auth-menu-container button {
       background: #222;
       border: 2px solid #00ffaa;
       color: #00ffaa;
       font-weight: bold;
-      padding: 10px 20px;
-      border-radius: 12px;
+      padding: 6px 12px;
+      border-radius: 8px;
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
-    button:hover {
-      background-color: #00ffaa22;
+    #auth-menu-container button:hover {
+      background-color: #00ffaa44;
+    }
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+    }
+    .user-name {
+      font-weight: bold;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   </style>
 </head>
 <body>
-  <header>
-    <img src="/imagenes/logo.png" alt="Logo" class="logo" />
-    <h1>Consola de Fastfarm</h1>
-  </header>
-
   <nav id="menu-superior">
-    <div class="menu-item" onclick="location.href='/inicio'">Inicio</div>
-    <div class="menu-item" onclick="location.href='/estado'">Estado</div>
-    <div class="menu-item" onclick="window.open('https://discord.gg/tu-servidor', '_blank')">Discord</div>
-    <div class="menu-item tienda" onclick="alert('La tienda estará disponible pronto!')">Tienda</div>
+    <div class="menu-item" data-pagina="inicio" onclick="location.href='/inicio'">
+      Inicio
+      <div class="descripcion">Volver a la página principal</div>
+    </div>
+    <div class="menu-item" data-pagina="estado" onclick="location.href='/estado'">
+      Estado
+      <div class="descripcion">Estado de los servidores</div>
+    </div>
+    <div class="menu-item activo" data-pagina="server2" onclick="location.href='/server2'">
+      FastFarm
+      <div class="descripcion">Consola FastFarm</div>
+    </div>
+    <div class="menu-item" onclick="window.open('https://discord.gg/tu-servidor', '_blank')">
+      Discord
+      <div class="descripcion">Únete a nuestra comunidad</div>
+    </div>
+    <div class="menu-item tienda" onclick="alert('La tienda estará disponible pronto!')">
+      Tienda
+      <div class="descripcion proximamente">Próximamente</div>
+    </div>
     <div id="auth-menu-container"></div>
   </nav>
 
   <main>
-    <div id="consola-output">Cargando consola...</div>
-    <input type="text" id="comando" placeholder="Escribe un comando y presiona Enter..." disabled autocomplete="off" />
+    <header>
+      <img src="imagenes/logo.png" alt="Logo" class="logo" />
+      <h1>Consola FastFarm</h1>
+      <h2>Estado y registros en tiempo real</h2>
+    </header>
+
+    <section id="consola">
+      <pre id="log-output">Cargando registros del servidor FastFarm...</pre>
+    </section>
+
+    <button onclick="location.href='/inicio'">Volver al inicio</button>
   </main>
 
-  <button onclick="location.href='/estado'">← Volver al estado</button>
-
+  <!-- Scripts -->
   <script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
-  <script src="/auth.js"></script>
+  <script src="auth.js"></script>
+  <script src="server2.js"></script>
   <script>
-    const consola = document.getElementById('consola-output');
-    const input = document.getElementById('comando');
-
-    // Inicializa Auth0 y controla acceso
-    auth0ClientPromise.then(async (auth0) => {
-      const isAuthenticated = await auth0.isAuthenticated();
-      if (!isAuthenticated) {
-        consola.textContent = '⚠️ Debes iniciar sesión para acceder a la consola.';
-        input.disabled = true;
-        return;
-      }
-
-      // Habilitar input y limpiar consola
-      input.disabled = false;
-      consola.textContent = 'Consola lista. Escribe un comando y presiona Enter.\n';
-
-      // Aquí puedes inicializar conexión WebSocket o API para consola real
-      // Por ahora simulamos respuesta simple
-
-      input.addEventListener('keydown', async (event) => {
-        if (event.key === 'Enter') {
-          const cmd = input.value.trim();
-          if (!cmd) return;
-          consola.textContent += `> ${cmd}\n`;
-          input.value = '';
-
-          // Simulación respuesta (reemplaza con llamada real)
-          setTimeout(() => {
-            consola.textContent += `Respuesta simulada para comando: "${cmd}"\n`;
-            consola.scrollTop = consola.scrollHeight;
-          }, 500);
-        }
-      });
-    });
+    const path = location.pathname.replace(/^\/+|\/+$/g, '') || 'inicio';
+    const item = document.querySelector(`[data-pagina="${path}"]`);
+    if (item) item.classList.add('activo');
   </script>
 </body>
 </html>
