@@ -1,61 +1,51 @@
-// auth.js
-
-// Asegúrate de cargar antes el SDK:
-// <script src="https://cdn.auth0.com/js/auth0-spa-js/1.26/auth0-spa-js.production.js"></script>
-
-let auth0 = null;
-
-window.onload = async () => {
-  auth0 = await createAuth0Client({
-    domain: "dev-gfo057i2wbpzipno.us.auth0.com",
-    client_id: "SqvyN9CZm22K6uZsuDT7C9rH5JHe59Mz",
-    redirect_uri: window.location.origin
-  });
-
-  // Procesar el callback de login si existe
-  if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
-    await auth0.handleRedirectCallback();
-    window.history.replaceState({}, document.title, "/");
-  }
-
-  await updateUI();
-
-  // Asignar eventos a botones si existen
-  const loginBtn = document.getElementById("login-btn");
-  const logoutBtn = document.getElementById("logout-btn");
-
-  if (loginBtn) loginBtn.addEventListener("click", login);
-  if (logoutBtn) logoutBtn.addEventListener("click", logout);
-};
-
-async function login() {
-  await auth0.loginWithRedirect();
-}
-
-function logout() {
-  auth0.logout({
-    returnTo: window.location.origin
-  });
-}
+const auth0ClientPromise = createAuth0Client({
+  domain: 'dev-gfo057i2wbpzipno.us.auth0.com',
+  client_id: 'SqvyN9CZm22K6uZsuDT7C9rH5JHe59Mz',
+  redirect_uri: window.location.origin
+});
 
 async function updateUI() {
+  const auth0 = await auth0ClientPromise;
   const isAuthenticated = await auth0.isAuthenticated();
+
+  const container = document.getElementById("auth-menu-container");
+  if (!container) return;
+
+  container.innerHTML = "";
 
   if (isAuthenticated) {
     const user = await auth0.getUser();
+    const avatar = document.createElement("img");
+    avatar.src = user.picture;
+    avatar.alt = "Avatar";
+    avatar.className = "user-avatar";
 
-    // Mostrar datos usuario y botones
-    document.getElementById("login-btn").style.display = "none";
-    document.getElementById("logout-btn").style.display = "inline-block";
-    document.getElementById("user-name").textContent = user.name || "";
-    document.getElementById("user-pic").src = user.picture || "";
-    document.getElementById("user-info").style.display = "flex";
+    const name = document.createElement("span");
+    name.textContent = user.name;
+    name.className = "user-name";
+
+    const logoutBtn = document.createElement("button");
+    logoutBtn.textContent = "Cerrar sesión";
+    logoutBtn.onclick = () => auth0.logout({ returnTo: window.location.origin });
+
+    container.appendChild(avatar);
+    container.appendChild(name);
+    container.appendChild(logoutBtn);
   } else {
-    // Mostrar login solo
-    document.getElementById("login-btn").style.display = "inline-block";
-    document.getElementById("logout-btn").style.display = "none";
-    document.getElementById("user-name").textContent = "";
-    document.getElementById("user-pic").src = "";
-    document.getElementById("user-info").style.display = "none";
+    const loginBtn = document.createElement("button");
+    loginBtn.textContent = "Iniciar sesión";
+    loginBtn.onclick = () => auth0.loginWithRedirect();
+    container.appendChild(loginBtn);
   }
 }
+
+window.onload = async () => {
+  const auth0 = await auth0ClientPromise;
+
+  if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+    await auth0.handleRedirectCallback();
+    window.history.replaceState({}, document.title, "/estado");
+  }
+
+  updateUI();
+};
