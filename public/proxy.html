@@ -1,1 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Proxy - Consola</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
+</head>
+<body>
+  <nav>
+    <a href="/">Inicio</a>
+    <button id="logout" style="display:none;">Cerrar sesión</button>
+    <span id="user-info"></span>
+  </nav>
 
+  <main>
+    <h1>Consola del servidor Proxy</h1>
+    <pre id="consola">Cargando consola...</pre>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    (async () => {
+      const auth0 = await auth0ClientPromise;
+      const isAuthenticated = await auth0.isAuthenticated();
+      if (!isAuthenticated) {
+        window.location.href = "/";
+        return;
+      }
+
+      const user = await auth0.getUser();
+      document.getElementById("user-info").textContent = `Bienvenido, ${user.name}`;
+      document.getElementById("logout").style.display = "inline";
+
+      // Aca inyectamos logs (por ahora simulados)
+      const consola = document.getElementById("consola");
+      consola.textContent = "Esperando logs del servidor proxy...\n";
+
+      // Simulación de logs
+      const logsSimulados = [
+        "[INFO] Proxy iniciado en puerto 25565",
+        "[CONEXIÓN] zRaysu se conectó desde IP 123.45.67.89",
+        "[PING] Lobby respondió en 59ms",
+        "[ADVERTENCIA] Posible bot detectado",
+      ];
+
+      logsSimulados.forEach((linea, i) => {
+        setTimeout(() => {
+          consola.textContent += linea + "\n";
+        }, 1000 * i);
+      });
+    })();
+  </script>
+</body>
+</html>
