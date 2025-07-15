@@ -1,3 +1,6 @@
 [build]
   functions = "netlify/functions"
   publish = "public"
+
+[functions."estado"]
+  included_files = ["netlify/functions/servidores.json"]
