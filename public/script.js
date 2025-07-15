@@ -55,4 +55,3 @@ async function cargarEstado() {
 
 cargarEstado();
 setInterval(cargarEstado, 60000);
-
