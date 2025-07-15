@@ -40,6 +40,23 @@
     #comando:disabled {
       background: #333;
       color: #888;
+      cursor: not-allowed;
+    }
+
+    button {
+      margin: 20px auto;
+      display: block;
+      background: #222;
+      border: 2px solid #00ffaa;
+      color: #00ffaa;
+      font-weight: bold;
+      padding: 10px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #00ffaa22;
     }
   </style>
 </head>
@@ -59,7 +76,7 @@
 
   <main>
     <div id="consola-output">Cargando consola...</div>
-    <input type="text" id="comando" placeholder="Escribe un comando y presiona Enter..." disabled />
+    <input type="text" id="comando" placeholder="Escribe un comando y presiona Enter..." disabled autocomplete="off" />
   </main>
 
   <button onclick="location.href='/estado'">← Volver al estado</button>
@@ -70,26 +87,34 @@
     const consola = document.getElementById('consola-output');
     const input = document.getElementById('comando');
 
+    // Inicializa Auth0 y controla acceso
     auth0ClientPromise.then(async (auth0) => {
       const isAuthenticated = await auth0.isAuthenticated();
       if (!isAuthenticated) {
-        consola.innerHTML = '⚠️ Debes estar logueado para acceder a esta consola.';
+        consola.textContent = '⚠️ Debes iniciar sesión para acceder a la consola.';
         input.disabled = true;
         return;
       }
 
-      const user = await auth0.getUser();
-      consola.textContent = `Fastfarm Console\n------------------\nBienvenido, ${user.name || 'Usuario'}\n\n[Esperando comandos...]\n`;
+      // Habilitar input y limpiar consola
       input.disabled = false;
+      consola.textContent = 'Consola lista. Escribe un comando y presiona Enter.\n';
 
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
+      // Aquí puedes inicializar conexión WebSocket o API para consola real
+      // Por ahora simulamos respuesta simple
+
+      input.addEventListener('keydown', async (event) => {
+        if (event.key === 'Enter') {
           const cmd = input.value.trim();
-          if (cmd !== '') {
-            consola.textContent += `\n> ${cmd}\n[Comando enviado a Fastfarm (simulado)]\n`;
-            input.value = '';
+          if (!cmd) return;
+          consola.textContent += `> ${cmd}\n`;
+          input.value = '';
+
+          // Simulación respuesta (reemplaza con llamada real)
+          setTimeout(() => {
+            consola.textContent += `Respuesta simulada para comando: "${cmd}"\n`;
             consola.scrollTop = consola.scrollHeight;
-          }
+          }, 500);
         }
       });
     });
