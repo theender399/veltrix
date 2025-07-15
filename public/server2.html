@@ -3,13 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fastfarm - Consola</title>
+  <title>Consola Fastfarm</title>
   <link rel="stylesheet" href="estado.css" />
+  <style>
+    main {
+      padding: 20px;
+      text-align: left;
+      max-width: 900px;
+      margin: 80px auto 40px;
+      background: #1a1a1a;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #00ffaa33;
+      font-family: monospace;
+      color: #00ffaa;
+      white-space: pre-wrap;
+      overflow-y: auto;
+      min-height: 300px;
+    }
+
+    #consola-placeholder {
+      font-style: italic;
+      color: #999;
+    }
+
+    .btn-volver {
+      background: #222;
+      border: 2px solid #00ffaa;
+      color: #00ffaa;
+      padding: 10px 20px;
+      font-weight: bold;
+      border-radius: 12px;
+      cursor: pointer;
+      margin: 20px auto;
+      display: block;
+      transition: background-color 0.3s ease;
+    }
+    .btn-volver:hover {
+      background-color: #00ffaa22;
+    }
+  </style>
 </head>
 <body>
   <header>
     <img src="/imagenes/logo.png" alt="Logo" class="logo" />
-    <h1>Consola: Fastfarm</h1>
+    <h1>Consola de Fastfarm</h1>
   </header>
 
   <nav id="menu-superior">
@@ -20,30 +57,26 @@
     <div id="auth-menu-container"></div>
   </nav>
 
-  <main id="contenido">
-    <p>Cargando consola...</p>
+  <main id="consola">
+    <div id="consola-placeholder">Cargando consola...</div>
   </main>
 
-  <button onclick="location.href='/estado'">Volver al estado</button>
+  <button class="btn-volver" onclick="location.href='/estado'">← Volver al estado</button>
 
   <script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
   <script src="/auth.js"></script>
   <script>
-    const main = document.getElementById('contenido');
+    const consola = document.getElementById('consola');
 
-    auth0ClientPromise.then(async auth0 => {
-      const isAuth = await auth0.isAuthenticated();
-      if (!isAuth) {
-        main.innerHTML = '<p style="color:red;">Debes estar logeado para acceder a esta página.</p>';
+    auth0ClientPromise.then(async (auth0) => {
+      const isAuthenticated = await auth0.isAuthenticated();
+      if (!isAuthenticated) {
+        consola.innerHTML = '<p style="color:red;">Debes estar logueado para acceder a esta consola.</p>';
         return;
       }
 
-      // Usuario autenticado
-      const user = await auth0.getUser();
-      main.innerHTML = `
-        <h2 style="color:#00ffaa;">Bienvenido, ${user.name || 'usuario'}</h2>
-        <p>Próximamente verás aquí los logs o comandos de Fastfarm.</p>
-      `;
+      // Simulación de logs o comandos
+      consola.innerHTML = `Fastfarm :: Consola Activa\n--------------------------\n> Bienvenido, ${await (await auth0.getUser()).name}\n\n[Esperando eventos del servidor...]\n\n`;
     });
   </script>
 </body>
