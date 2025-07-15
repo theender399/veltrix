@@ -35,6 +35,11 @@
       background-color: #00ffaa22;
     }
 
+    .menu-item.activo {
+      background-color: #00ffaa44;
+      box-shadow: 0 0 6px #00ffaa99;
+    }
+
     .descripcion {
       font-size: 0.7rem;
       color: #55ffaa;
@@ -79,7 +84,6 @@
       margin-top: 40px;
     }
 
-    /* Botón volver al inicio estilo simple */
     button {
       background: #222;
       border: 2px solid #00ffaa;
@@ -105,12 +109,12 @@
 
   <!-- Menú superior -->
   <nav id="menu-superior">
-    <div class="menu-item" onclick="location.href='/inicio'">
+    <div class="menu-item" data-pagina="inicio" onclick="location.href='/inicio'">
       Inicio
       <div class="descripcion">Volver a la página principal</div>
     </div>
 
-    <div class="menu-item" onclick="location.href='/estado'">
+    <div class="menu-item" data-pagina="estado" onclick="location.href='/estado'">
       Estado
       <div class="descripcion">Estado de los servidores</div>
     </div>
@@ -141,5 +145,11 @@
   <button onclick="location.href='/inicio'">Volver al inicio</button>
 
   <script src="script.js"></script>
+  <script>
+    // Resaltar el botón del menú según la página actual
+    const ruta = location.pathname.replace('/', '');
+    const activos = document.querySelectorAll(`[data-pagina="${ruta || 'inicio'}"]`);
+    activos.forEach(el => el.classList.add('activo'));
+  </script>
 </body>
 </html>
