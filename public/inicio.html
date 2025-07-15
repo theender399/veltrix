@@ -30,8 +30,14 @@
       user-select: none;
       transition: background-color 0.3s ease;
     }
+
     .menu-item:hover {
       background-color: #00ffaa22;
+    }
+
+    .menu-item.activo {
+      background-color: #00ffaa44;
+      box-shadow: 0 0 6px #00ffaa99;
     }
 
     .descripcion {
@@ -47,6 +53,7 @@
       transition: opacity 0.3s ease;
       user-select: none;
     }
+
     .menu-item:hover .descripcion {
       opacity: 1;
     }
@@ -64,7 +71,7 @@
       font-family: Arial, sans-serif;
       background: #111;
       color: #00ffaa;
-      padding-top: 60px; /* para no tapar contenido con el menú fijo */
+      padding-top: 60px;
       text-align: center;
     }
 
@@ -88,7 +95,7 @@
 
   <!-- Menú superior -->
   <nav id="menu-superior">
-    <div class="menu-item" onclick="location.href='/estado'">
+    <div class="menu-item" data-pagina="inicio" onclick="location.href='/inicio'">
       Estado
       <div class="descripcion">Estado de los servidores</div>
     </div>
@@ -107,5 +114,12 @@
   <main>
     <p>Contenido principal de la página de inicio aquí.</p>
   </main>
+
+  <script>
+    // Resalta el ítem de menú correspondiente a la ruta actual
+    const ruta = location.pathname.replace('/', '') || 'inicio';
+    const activo = document.querySelector(`[data-pagina="${ruta}"]`);
+    if (activo) activo.classList.add('activo');
+  </script>
 </body>
 </html>
