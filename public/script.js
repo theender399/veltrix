@@ -122,20 +122,45 @@ if (document.readyState === 'loading') {
 window.addEventListener('beforeunload', () => {
   clearInterval(refreshInterval);
 });
-// script.js
-const executeCommand = async (command) => {
-  const response = await fetch('/.netlify/functions/rcon-command', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ command })
-  });
-  
-  if (!response.ok) throw new Error('Error en RCON');
-  return await response.json();
-};
+// En tu archivo JS del frontend (ej: app.js)
+class RconClient {
+  constructor() {
+    this.endpoint = '/.netlify/functions/rcon-command';
+  }
 
-// Ejemplo de uso:
-document.getElementById('btn-list').addEventListener('click', async () => {
-  const { response } = await executeCommand('list');
-  console.log('Jugadores conectados:', response);
+  async sendCommand(command) {
+    try {
+      const response = await fetch(this.endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command })
+      });
+      
+      if (!response.ok) throw new Error('Error en la red');
+      return await response.json();
+    } catch (error) {
+      console.error('RCON Error:', error);
+      return { error: error.message };
+    }
+  }
+
+  // Ejemplo de comandos útiles
+  async getPlayers() {
+    return this.sendCommand('list');
+  }
+
+  async say(message) {
+    return this.sendCommand(`say ${message}`);
+  }
+}
+
+// Uso:
+const rcon = new RconClient();
+
+// Ejemplo 1: Listar jugadores
+rcon.getPlayers().then(({ response }) => {
+  console.log('Jugadores:', response);
 });
+
+// Ejemplo 2: Enviar mensaje al chat
+rcon.say('Hola desde el panel web!');
