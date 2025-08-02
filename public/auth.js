@@ -1,8 +1,8 @@
 const auth0ClientPromise = createAuth0Client({
-  domain: 'dev-gfo057i2wbpzipno.us.auth0.com',
-  client_id: 'SqvyN9CZm22K6uZsuDT7C9rH5JHe59Mz',
+  domain: 'veltrixcraft.us.auth0.com',
+  client_id: 'CHg3x5kXLUpe5rcI81JO926bv8lpDbn1',
   // Importante: que sea EXACTAMENTE tu dominio Netlify
-  redirect_uri: 'https://veltrixstatus.netlify.app/estado' 
+  redirect_uri: 'https://veltrixcraft.netlify.app/estado' 
 });
 
 async function updateUI() {
