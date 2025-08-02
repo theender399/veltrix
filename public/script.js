@@ -1,63 +1,124 @@
+// Configuración centralizada de servidores
+const serverConfig = {
+  proxy: { 
+    name: 'Proxy', 
+    path: '/proxy/',
+    style: 'border-color: #00ff88;' 
+  },
+  server1: { 
+    name: 'Lobby', 
+    path: '/server1/',
+    style: 'border-color: #0099ff;'
+  },
+  server2: { 
+    name: 'Fastfarm', 
+    path: '/server2/',
+    style: 'border-color: #ff9900;'
+  }
+};
+
+// Estilos reutilizables
+const styles = {
+  nombre: 'font-weight: bold; font-size: 1.2rem;',
+  estado: 'font-family: monospace; margin: 5px 0;',
+  error: 'color: #ff5555; font-family: monospace;',
+  jugadores: 'font-family: monospace; color: #aaaaaa;',
+  consolaLink: 'color: #00ffaa; text-decoration: none; margin-top: 8px; display: inline-block;'
+};
+
+// Cache de elementos DOM
+const containers = {};
+Object.keys(serverConfig).forEach(id => {
+  containers[id] = document.getElementById(id);
+});
+
+/**
+ * Actualiza la UI con el estado de los servidores
+ * @param {Object} data - Datos de respuesta de la API
+ * @param {boolean} isAuthenticated - Si el usuario está autenticado
+ */
+function actualizarUI(data, isAuthenticated) {
+  Object.entries(serverConfig).forEach(([id, config]) => {
+    const container = containers[id];
+    if (!container) return;
+
+    const srv = data[id];
+    container.className = 'card';
+    container.style.cssText = srv?.online ? config.style : 'border-color: #ff5555;';
+
+    if (!srv) {
+      container.innerHTML = `<span style="${styles.error}">⚠️ Servidor no disponible</span>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <span style="${styles.nombre}">${config.name}</span>
+      <span class="estado" style="${styles.estado}">
+        ${srv.online ? '🟢 Online' : '🔴 Offline'}
+      </span>
+      ${srv.online ? `
+        <span style="${styles.jugadores}">
+          👥 ${srv.players}/${srv.max} jugadores
+        </span>
+      ` : ''}
+      ${isAuthenticated && srv.online ? `
+        <a href="${config.path}" style="${styles.consolaLink}">
+          [Acceder a consola]
+        </a>
+      ` : ''}
+    `;
+  });
+}
+
+/**
+ * Carga el estado de los servidores desde la API
+ */
 async function cargarEstado() {
   try {
-    const auth0 = await auth0ClientPromise;
-    const isAuthenticated = await auth0.isAuthenticated();
-
-    const res = await fetch('/.netlify/functions/estado');
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const [auth0, res] = await Promise.all([
+      auth0ClientPromise,
+      fetch('/.netlify/functions/estado', {
+        headers: { 'Cache-Control': 'no-cache' }
+      })
+    ]);
+    
+    if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+    
     const data = await res.json();
+    const isAuthenticated = await auth0?.isAuthenticated() || false;
+    
+    actualizarUI(data, isAuthenticated);
 
-    const servidores = ['proxy', 'server1', 'server2'];
-
-    for (const id of servidores) {
-      const srv = data[id];
-      const container = document.getElementById(id);
-      if (!container) continue;
-
-      container.innerHTML = '';
-      container.classList.remove('online', 'offline');
-
-      if (srv && srv.online) {
-        container.classList.add('online');
-      } else {
-        container.classList.add('offline');
-      }
-
-      if (!srv) {
-        container.innerHTML = `<span style="color:red; font-family: monospace;">Servidor no disponible</span>`;
-        continue;
-      }
-
-      const nombreMapa = {
-        proxy: 'Proxy',
-        server1: 'Lobby',
-        server2: 'Fastfarm'
-      };
-
-      const nombreHTML = `<span class="nombre" style="font-weight:bold; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1.2rem;">${nombreMapa[id] || id}</span>`;
-      const estadoHTML = `<span class="estado ${srv.online ? 'online' : 'offline'}" style="font-family: monospace;">${srv.online ? '🟢 Online' : '🔴 Offline'}</span>`;
-      const jugadoresHTML = `<span class="jugadores" style="font-family: monospace;">${srv.online ? `Jugadores: ${srv.players}/${srv.max}` : ''}</span>`;
-
-      let consolaHTML = '';
-      if (isAuthenticated && srv.online) {
-        consolaHTML = ` <a href="/${id}/" class="consola-link" style="color:#007bff; text-decoration:none; font-weight:bold; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">[Console]</a>`;
-      }
-
-      container.innerHTML = `
-        ${nombreHTML} <br>
-        ${estadoHTML} <br>
-        ${jugadoresHTML}
-        ${consolaHTML}
-      `;
-    }
   } catch (error) {
-    console.error('Error cargando estado:', error);
-    const contenedor = document.getElementById('estado');
-    if (contenedor) {
-      contenedor.innerHTML = `<p style="color:red;">No se pudo cargar el estado. Intenta recargar la página.</p>`;
-    }
+    console.error('Error al cargar estado:', error);
+    document.getElementById('estado')?.insertAdjacentHTML('beforeend', `
+      <p style="${styles.error}">
+        ⚠️ Error: ${error.message || 'No se pudo cargar el estado'}
+      </p>
+    `);
   }
 }
 
-cargarEstado();
-setInterval(cargarEstado, 60000);
+// Sistema de actualización automática
+let refreshInterval;
+function iniciarMonitor() {
+  cargarEstado(); // Carga inmediata
+  refreshInterval = setInterval(cargarEstado, 60000); // Actualizar cada minuto
+  
+  // Opcional: Actualizar al volver a la pestaña
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) cargarEstado();
+  });
+}
+
+// Iniciar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', iniciarMonitor);
+} else {
+  iniciarMonitor();
+}
+
+// Limpiar al salir
+window.addEventListener('beforeunload', () => {
+  clearInterval(refreshInterval);
+});
