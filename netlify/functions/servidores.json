@@ -2,19 +2,19 @@
   {
     "id": "proxy",
     "nombre": "Bungeecord",
-    "host": "45.58.127.189",
+    "host": "102.129.137.165",
     "puerto": 25565
   },
   {
     "id": "server1",
     "nombre": "Lobby",
-    "host": "172.93.110.69",
+    "host": "104.243.47.127",
     "puerto": 25569
   },
   {
     "id": "server2",
     "nombre": "FastFarm",
-    "host": "102.129.137.165",
-    "puerto": 25567
+    "host": "172.93.110.246",
+    "puerto": 25568
   }
 ]
