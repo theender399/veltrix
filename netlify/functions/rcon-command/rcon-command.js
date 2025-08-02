@@ -1,19 +1,24 @@
+// netlify/functions/rcon-command.js
 const { RCON } = require('minecraft-server-util');
 
 exports.handler = async (event) => {
   const { command } = JSON.parse(event.body);
   
+  const client = new RCON();
   try {
-    const client = new RCON();
-    await client.connect({
-      host: process.env.RCON_HOST,
-      port: parseInt(process.env.RCON_PORT),
-      password: process.env.RCON_PASSWORD
-    });
-
+    // Versión CORRECTA (host como string)
+    await client.connect(
+      process.env.RCON_HOST, // ← String directo
+      parseInt(process.env.RCON_PORT),
+      { 
+        password: process.env.RCON_PASSWORD,
+        timeout: 5000
+      }
+    );
+    
     const response = await client.execute(command);
     await client.close();
-
+    
     return {
       statusCode: 200,
       body: JSON.stringify({ response })
@@ -23,7 +28,7 @@ exports.handler = async (event) => {
       statusCode: 500,
       body: JSON.stringify({ 
         error: error.message,
-        details: "Verifica que el servidor RCON esté activo y las credenciales sean correctas"
+        stack: error.stack // ← Para debug
       })
     };
   }
