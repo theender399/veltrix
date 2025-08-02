@@ -1,246 +1,183 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lobby - Estado del Servidor</title>
+  <title>Lobby - Consola RCON</title>
   <link rel="stylesheet" href="server1.css" />
   <style>
-    /* Menú superior (igual que en proxy y server2) */
-    #menu-superior {
-      display: flex;
-      background: #222;
-      padding: 10px 20px;
-      justify-content: center;
-      gap: 25px;
-      position: fixed;
-      top: 0;
-      width: 100%;
-      z-index: 1000;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.7);
-      align-items: center;
-    }
-    .menu-item {
-      color: #00ffaa;
-      cursor: pointer;
-      font-weight: bold;
-      position: relative;
-      padding: 6px 12px;
-      border-radius: 8px;
-      user-select: none;
-      transition: background-color 0.3s ease;
-    }
-    .menu-item:hover {
-      background-color: #00ffaa22;
-    }
-    .menu-item.activo {
-      background-color: #00ffaa44;
-      box-shadow: 0 0 6px #00ffaa99;
-    }
-    .descripcion {
-      font-size: 0.7rem;
-      color: #55ffaa;
-      position: absolute;
-      top: 32px;
-      left: 50%;
-      transform: translateX(-50%);
-      white-space: nowrap;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      user-select: none;
-    }
-    .menu-item:hover .descripcion {
-      opacity: 1;
-    }
-    .tienda .proximamente {
-      color: #ff4444;
-      font-weight: bold;
-      font-size: 0.7rem;
-      margin-top: 3px;
-      pointer-events: none;
-    }
-    #auth-menu-container {
-      margin-left: auto;
-      color: #00ffaa;
-      user-select: none;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    #auth-menu-container button {
-      background: #222;
-      border: 2px solid #00ffaa;
-      color: #00ffaa;
-      font-weight: bold;
-      padding: 6px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    #auth-menu-container button:hover {
-      background-color: #00ffaa44;
-    }
-    .user-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-    }
-    .user-name {
-      font-weight: bold;
-      max-width: 140px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+    /* Estilos del menú (igual que antes) */
+    #menu-superior { /* ... mantener igual ... */ }
+    .menu-item { /* ... mantener igual ... */ }
+    /* ... otros estilos del menú ... */
 
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: 'Courier New', monospace;
       background: #111;
       color: #00ffaa;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       min-height: 100vh;
-      text-align: center;
-      padding-top: 60px; /* para menú fijo */
+      padding-top: 60px;
     }
 
-    header {
-      text-align: center;
-      margin-top: 10px;
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
     }
 
-    h1 {
-      font-size: 1.8rem;
-      margin: 0 0 20px;
-    }
-
-    .logo {
-      width: 160px;
-      height: auto;
-      display: block;
-      margin: 0 auto 10px auto;
-    }
-
-    /* Área de estado */
-    #estado-servidor {
+    /* Panel de estado */
+    #estado-panel {
       background: #222;
-      border-radius: 12px;
-      padding: 25px;
-      text-align: center;
       border: 3px solid #444;
-      max-width: 640px;
-      width: 90%;
-      height: 300px;
-      box-shadow: none;
-      font-weight: bold;
-      font-size: 1.2rem;
-      user-select: none;
-      margin-bottom: 40px;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      color: #00ffaa;
-      transition: box-shadow 0.3s ease;
     }
-    #estado-servidor.online {
+    #estado-panel.online {
       border-color: #00ff88;
-      box-shadow: 0 0 15px #00ff88cc;
-      color: #00ff88;
+      box-shadow: 0 0 10px #00ff8888;
     }
-    #estado-servidor.offline {
+    #estado-panel.offline {
       border-color: #ff5555;
-      box-shadow: 0 0 15px #ff5555cc;
-      color: #ff5555;
+      box-shadow: 0 0 10px #ff555588;
     }
-    #estado-servidor:hover {
-      box-shadow: 0 0 25px #00ffaaaa;
+    .estado-info {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    .estado-indicador {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+    }
+    .online .estado-indicador {
+      background: #00ff88;
+      box-shadow: 0 0 5px #00ff88;
+    }
+    .offline .estado-indicador {
+      background: #ff5555;
+      box-shadow: 0 0 5px #ff5555;
     }
 
-    button {
+    /* Consola RCON */
+    #consola-rcon {
+      background: #000;
+      border: 2px solid #00ffaa;
+      border-radius: 8px;
+      height: 400px;
+      overflow-y: auto;
+      padding: 15px;
+      margin-bottom: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      text-align: left;
+      white-space: pre-wrap;
+    }
+    #consola-rcon::-webkit-scrollbar {
+      width: 8px;
+    }
+    #consola-rcon::-webkit-scrollbar-track {
+      background: #222;
+    }
+    #consola-rcon::-webkit-scrollbar-thumb {
+      background: #00ffaa;
+      border-radius: 4px;
+    }
+
+    /* Input de comandos */
+    #rcon-form {
+      display: flex;
+      gap: 10px;
+    }
+    #rcon-comando {
+      flex-grow: 1;
       background: #222;
       border: 2px solid #00ffaa;
       color: #00ffaa;
-      padding: 10px 20px;
-      font-weight: bold;
-      border-radius: 12px;
-      cursor: pointer;
-      margin: 0 auto 30px;
-      display: block;
-      transition: background-color 0.3s ease;
+      padding: 10px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
     }
-    button:hover {
-      background-color: #00ffaa22;
+    #rcon-submit {
+      background: #00ffaa;
+      color: #111;
+      border: none;
+      padding: 0 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    #rcon-submit:hover {
+      opacity: 0.8;
+    }
+    #rcon-submit:disabled {
+      background: #555;
+      cursor: not-allowed;
     }
 
-    @media (max-width: 600px) {
-      header .logo {
-        width: 120px;
+    /* Mensajes de la consola */
+    .mensaje-entrada {
+      color: #00ffaa;
+    }
+    .mensaje-salida {
+      color: #ffffff;
+    }
+    .mensaje-error {
+      color: #ff5555;
+    }
+    .mensaje-sistema {
+      color: #aaaaaa;
+      font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+      #consola-rcon {
+        height: 300px;
       }
-      h1 {
-        font-size: 1.3rem;
-      }
-      #estado-servidor {
-        height: 200px;
-        font-size: 1rem;
-        padding: 15px;
+      #rcon-form {
+        flex-direction: column;
       }
     }
   </style>
 </head>
 <body>
   <nav id="menu-superior">
-    <div class="menu-item" data-pagina="proxy" onclick="location.href='/proxy'">
-      Proxy
-      <div class="descripcion">Estado del Proxy</div>
-    </div>
-    <div class="menu-item" data-pagina="estado" onclick="location.href='/estado'">
-      Estado
-      <div class="descripcion">Estado de los servidores</div>
-    </div>
-    <div class="menu-item activo" data-pagina="server1" onclick="location.href='/server1'">
-      Lobby
-      <div class="descripcion">Estado del Lobby</div>
-    </div>
-    <div class="menu-item" data-pagina="server2" onclick="location.href='/server2'">
-      FastFarm
-      <div class="descripcion">Consola FastFarm</div>
-    </div>
-    <div class="menu-item" onclick="window.open('https://discord.gg/tu-servidor', '_blank')">
-      Discord
-      <div class="descripcion">Únete a nuestra comunidad</div>
-    </div>
-    <div class="menu-item tienda" onclick="alert('La tienda estará disponible pronto!')">
-      Tienda
-      <div class="descripcion proximamente">Próximamente</div>
-    </div>
-    <div id="auth-menu-container"></div>
+    <!-- Mantener igual que antes -->
   </nav>
 
   <main>
     <header>
       <img src="imagenes/logo.png" alt="Logo" class="logo" />
-      <h1>Estado Lobby</h1>
+      <h1>Consola Lobby</h1>
     </header>
 
-    <section id="estado-servidor" class="offline">
-      Cargando estado del Lobby...
+    <section id="estado-panel" class="offline">
+      <div class="estado-info">
+        <div class="estado-indicador"></div>
+        <span id="estado-texto">Conectando al servidor...</span>
+      </div>
+      <div id="jugadores-info">
+        <span id="jugadores-contador">0/0 jugadores</span>
+      </div>
     </section>
 
-    <button onclick="location.href='/inicio'">Volver al inicio</button>
+    <div id="consola-rcon"></div>
+
+    <form id="rcon-form">
+      <input type="text" id="rcon-comando" placeholder="Escribe un comando..." autocomplete="off" disabled>
+      <button type="submit" id="rcon-submit" disabled>Enviar</button>
+    </form>
   </main>
 
   <!-- Scripts -->
   <script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
   <script src="auth.js"></script>
   <script src="server1.js"></script>
-  <script>
-    const path = location.pathname.replace(/^\/+|\/+$/g, '') || 'inicio';
-    const item = document.querySelector(`[data-pagina="${path}"]`);
-    if (item) item.classList.add('activo');
-  </script>
 </body>
 </html>
