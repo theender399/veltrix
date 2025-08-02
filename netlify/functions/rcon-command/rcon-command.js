@@ -1,47 +1,47 @@
+// netlify/functions/rcon-command.js
 const { RCON } = require('minecraft-server-util');
 
 exports.handler = async (event) => {
-  // 1. Verifica si hay body
-  if (!event.body) {
+  // Verifica el método HTTP
+  if (event.httpMethod !== 'POST') {
     return {
-      statusCode: 400,
-      body: JSON.stringify({ error: "No se recibieron datos" })
+      statusCode: 405,
+      body: JSON.stringify({ error: 'Método no permitido. Usa POST' })
     };
   }
 
-  // 2. Parsea el JSON con manejo de errores
-  let commandData;
+  // Parsea el cuerpo de la solicitud
+  let data;
   try {
-    commandData = JSON.parse(event.body);
-  } catch (e) {
+    data = JSON.parse(event.body);
+  } catch (error) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ 
-        error: "Formato JSON inválido",
-        details: e.message
-      })
+      body: JSON.stringify({ error: 'Cuerpo JSON inválido' })
     };
   }
 
-  // 3. Verifica que venga el comando
-  if (!commandData.command) {
+  // Valida el comando
+  if (!data.command) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: "Falta el campo 'command'" })
+      body: JSON.stringify({ error: 'El campo "command" es requerido' })
     };
   }
 
-  // 4. Ejecución RCON (con timeout)
+  // Configuración RCON (usa variables de entorno de Netlify)
+  const config = {
+    host: process.env.RCON_HOST,
+    port: parseInt(process.env.RCON_PORT),
+    password: process.env.RCON_PASSWORD,
+    timeout: 4000 // 4 segundos
+  };
+
+  // Ejecuta el comando
   const client = new RCON();
   try {
-    await client.connect({
-      host: process.env.RCON_HOST,
-      port: parseInt(process.env.RCON_PORT),
-      password: process.env.RCON_PASSWORD,
-      timeout: 4000 // 4 segundos
-    });
-
-    const response = await client.execute(commandData.command);
+    await client.connect(config);
+    const response = await client.execute(data.command);
     return {
       statusCode: 200,
       body: JSON.stringify({ response })
@@ -49,10 +49,10 @@ exports.handler = async (event) => {
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        error: "Error en RCON",
+      body: JSON.stringify({ 
+        error: 'Error en RCON',
         message: error.message,
-        stack: error.stack
+        config: { ...config, password: '***' } // Oculta la contraseña en logs
       })
     };
   } finally {
