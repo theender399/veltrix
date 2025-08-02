@@ -1,8 +1,8 @@
 // Configuración RCON
 const RCON_CONFIG = {
-  host: '172.93.110.246',
+  host: '104.243.47.127',
   port: 25575, // Puerto RCON
-  password: '11241112412434532112324345321123', // Se obtendrá del backend seguro
+  password: 'rf23wesdfq23d433qdeq23dfw34qtf6hy67ehw5g', // Se obtendrá del backend seguro
   timeout: 5000
 };
 
