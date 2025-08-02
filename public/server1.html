@@ -1,246 +1,189 @@
+// Configuración RCON
+const RCON_CONFIG = {
+  host: 'tu-servidor-minecraft.com',
+  port: 25575, // Puerto RCON
+  password: '', // Se obtendrá del backend seguro
+  timeout: 5000
+};
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lobby - Estado del Servidor</title>
-  <link rel="stylesheet" href="server1.css" />
-  <style>
-    /* Menú superior (igual que en proxy y server2) */
-    #menu-superior {
-      display: flex;
-      background: #222;
-      padding: 10px 20px;
-      justify-content: center;
-      gap: 25px;
-      position: fixed;
-      top: 0;
-      width: 100%;
-      z-index: 1000;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.7);
-      align-items: center;
-    }
-    .menu-item {
-      color: #00ffaa;
-      cursor: pointer;
-      font-weight: bold;
-      position: relative;
-      padding: 6px 12px;
-      border-radius: 8px;
-      user-select: none;
-      transition: background-color 0.3s ease;
-    }
-    .menu-item:hover {
-      background-color: #00ffaa22;
-    }
-    .menu-item.activo {
-      background-color: #00ffaa44;
-      box-shadow: 0 0 6px #00ffaa99;
-    }
-    .descripcion {
-      font-size: 0.7rem;
-      color: #55ffaa;
-      position: absolute;
-      top: 32px;
-      left: 50%;
-      transform: translateX(-50%);
-      white-space: nowrap;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      user-select: none;
-    }
-    .menu-item:hover .descripcion {
-      opacity: 1;
-    }
-    .tienda .proximamente {
-      color: #ff4444;
-      font-weight: bold;
-      font-size: 0.7rem;
-      margin-top: 3px;
-      pointer-events: none;
-    }
-    #auth-menu-container {
-      margin-left: auto;
-      color: #00ffaa;
-      user-select: none;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    #auth-menu-container button {
-      background: #222;
-      border: 2px solid #00ffaa;
-      color: #00ffaa;
-      font-weight: bold;
-      padding: 6px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    #auth-menu-container button:hover {
-      background-color: #00ffaa44;
-    }
-    .user-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-    }
-    .user-name {
-      font-weight: bold;
-      max-width: 140px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+// Elementos del DOM
+const consola = document.getElementById('consola-rcon');
+const form = document.getElementById('rcon-form');
+const comandoInput = document.getElementById('rcon-comando');
+const submitBtn = document.getElementById('rcon-submit');
+const estadoPanel = document.getElementById('estado-panel');
+const estadoTexto = document.getElementById('estado-texto');
+const jugadoresContador = document.getElementById('jugadores-contador');
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #00ffaa;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      text-align: center;
-      padding-top: 60px; /* para menú fijo */
-    }
+// Variables de estado
+let rconConnection = null;
+let isAuthenticated = false;
 
-    header {
-      text-align: center;
-      margin-top: 10px;
-    }
+// Función para agregar mensajes a la consola
+function logConsola(mensaje, tipo = 'salida') {
+  const ahora = new Date();
+  const hora = ahora.toLocaleTimeString();
+  const elemento = document.createElement('div');
+  elemento.className = `mensaje-${tipo}`;
+  elemento.innerHTML = `[${hora}] ${mensaje}`;
+  consola.appendChild(elemento);
+  consola.scrollTop = consola.scrollHeight;
+}
 
-    h1 {
-      font-size: 1.8rem;
-      margin: 0 0 20px;
+// Conexión RCON (usando un backend seguro)
+async function conectarRCON() {
+  try {
+    logConsola('Conectando al servidor RCON...', 'sistema');
+    
+    const auth0 = await auth0ClientPromise;
+    isAuthenticated = await auth0.isAuthenticated();
+    
+    if (!isAuthenticated) {
+      throw new Error('Debes iniciar sesión para usar RCON');
     }
+    
+    const respuesta = await fetch('/.netlify/functions/rcon-connect', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${await auth0.getTokenSilently()}`
+      },
+      body: JSON.stringify({ server: 'lobby' })
+    });
+    
+    if (!respuesta.ok) {
+      throw new Error('Error al conectar con RCON');
+    }
+    
+    const data = await respuesta.json();
+    RCON_CONFIG.password = data.tempPassword;
+    
+    logConsola('Conexión RCON establecida', 'sistema');
+    estadoPanel.className = 'estado-panel online';
+    estadoTexto.textContent = 'Conectado al servidor';
+    
+    // Habilitar interfaz
+    comandoInput.disabled = false;
+    submitBtn.disabled = false;
+    comandoInput.focus();
+    
+    // Obtener estado inicial
+    obtenerEstadoServidor();
+    
+  } catch (error) {
+    logConsola(`Error: ${error.message}`, 'error');
+    estadoPanel.className = 'estado-panel offline';
+    estadoTexto.textContent = 'Error de conexión';
+  }
+}
 
-    .logo {
-      width: 160px;
-      height: auto;
-      display: block;
-      margin: 0 auto 10px auto;
+// Enviar comando RCON
+async function enviarComando(comando) {
+  if (!comando.trim()) return;
+  
+  logConsola(comando, 'entrada');
+  
+  try {
+    const respuesta = await fetch('/.netlify/functions/rcon-command', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${await auth0.getTokenSilently()}`
+      },
+      body: JSON.stringify({
+        server: 'lobby',
+        command: comando
+      })
+    });
+    
+    if (!respuesta.ok) {
+      throw new Error('Error al ejecutar comando');
     }
+    
+    const data = await respuesta.json();
+    logConsola(data.response, 'salida');
+    
+    // Si es un comando de jugadores, actualizar contador
+    if (comando.startsWith('list') || comando.startsWith('players')) {
+      actualizarContadorJugadores(data.response);
+    }
+    
+  } catch (error) {
+    logConsola(`Error: ${error.message}`, 'error');
+  }
+}
 
-    /* Área de estado */
-    #estado-servidor {
-      background: #222;
-      border-radius: 12px;
-      padding: 25px;
-      text-align: center;
-      border: 3px solid #444;
-      max-width: 640px;
-      width: 90%;
-      height: 300px;
-      box-shadow: none;
-      font-weight: bold;
-      font-size: 1.2rem;
-      user-select: none;
-      margin-bottom: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #00ffaa;
-      transition: box-shadow 0.3s ease;
-    }
-    #estado-servidor.online {
-      border-color: #00ff88;
-      box-shadow: 0 0 15px #00ff88cc;
-      color: #00ff88;
-    }
-    #estado-servidor.offline {
-      border-color: #ff5555;
-      box-shadow: 0 0 15px #ff5555cc;
-      color: #ff5555;
-    }
-    #estado-servidor:hover {
-      box-shadow: 0 0 25px #00ffaaaa;
-    }
+// Analizar respuesta de jugadores
+function actualizarContadorJugadores(respuesta) {
+  const match = respuesta.match(/There are (\d+) of a max of (\d+) players online/);
+  if (match) {
+    jugadoresContador.textContent = `${match[1]}/${match[2]} jugadores`;
+  }
+}
 
-    button {
-      background: #222;
-      border: 2px solid #00ffaa;
-      color: #00ffaa;
-      padding: 10px 20px;
-      font-weight: bold;
-      border-radius: 12px;
-      cursor: pointer;
-      margin: 0 auto 30px;
-      display: block;
-      transition: background-color 0.3s ease;
-    }
-    button:hover {
-      background-color: #00ffaa22;
-    }
+// Obtener estado periódico del servidor
+async function obtenerEstadoServidor() {
+  try {
+    await enviarComando('list');
+    setTimeout(obtenerEstadoServidor, 30000); // Actualizar cada 30s
+  } catch (error) {
+    logConsola('Error obteniendo estado del servidor', 'error');
+  }
+}
 
-    @media (max-width: 600px) {
-      header .logo {
-        width: 120px;
+// Event Listeners
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const comando = comandoInput.value;
+  comandoInput.value = '';
+  await enviarComando(comando);
+});
+
+// Historial de comandos con flechas
+const historialComandos = [];
+let indiceHistorial = -1;
+
+comandoInput.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowUp' && historialComandos.length > 0) {
+    e.preventDefault();
+    if (indiceHistorial < historialComandos.length - 1) {
+      indiceHistorial++;
+    }
+    comandoInput.value = historialComandos[historialComandos.length - 1 - indiceHistorial];
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (indiceHistorial > 0) {
+      indiceHistorial--;
+      comandoInput.value = historialComandos[historialComandos.length - 1 - indiceHistorial];
+    } else {
+      indiceHistorial = -1;
+      comandoInput.value = '';
+    }
+  }
+});
+
+// Iniciar conexión al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+  // Verificar autenticación primero
+  (async () => {
+    try {
+      const auth0 = await auth0ClientPromise;
+      isAuthenticated = await auth0.isAuthenticated();
+      
+      if (isAuthenticated) {
+        await conectarRCON();
+      } else {
+        logConsola('Por favor inicia sesión para acceder a RCON', 'error');
+        estadoTexto.textContent = 'No autenticado';
       }
-      h1 {
-        font-size: 1.3rem;
-      }
-      #estado-servidor {
-        height: 200px;
-        font-size: 1rem;
-        padding: 15px;
-      }
+    } catch (error) {
+      logConsola(`Error de autenticación: ${error.message}`, 'error');
     }
-  </style>
-</head>
-<body>
-  <nav id="menu-superior">
-    <div class="menu-item" data-pagina="proxy" onclick="location.href='/proxy'">
-      Proxy
-      <div class="descripcion">Estado del Proxy</div>
-    </div>
-    <div class="menu-item" data-pagina="estado" onclick="location.href='/estado'">
-      Estado
-      <div class="descripcion">Estado de los servidores</div>
-    </div>
-    <div class="menu-item activo" data-pagina="server1" onclick="location.href='/server1'">
-      Lobby
-      <div class="descripcion">Estado del Lobby</div>
-    </div>
-    <div class="menu-item" data-pagina="server2" onclick="location.href='/server2'">
-      FastFarm
-      <div class="descripcion">Consola FastFarm</div>
-    </div>
-    <div class="menu-item" onclick="window.open('https://discord.gg/tu-servidor', '_blank')">
-      Discord
-      <div class="descripcion">Únete a nuestra comunidad</div>
-    </div>
-    <div class="menu-item tienda" onclick="alert('La tienda estará disponible pronto!')">
-      Tienda
-      <div class="descripcion proximamente">Próximamente</div>
-    </div>
-    <div id="auth-menu-container"></div>
-  </nav>
+  })();
+});
 
-  <main>
-    <header>
-      <img src="imagenes/logo.png" alt="Logo" class="logo" />
-      <h1>Estado Lobby</h1>
-    </header>
-
-    <section id="estado-servidor" class="offline">
-      Cargando estado del Lobby...
-    </section>
-
-    <button onclick="location.href='/inicio'">Volver al inicio</button>
-  </main>
-
-  <!-- Scripts -->
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
-  <script src="auth.js"></script>
-  <script src="server1.js"></script>
-  <script>
-    const path = location.pathname.replace(/^\/+|\/+$/g, '') || 'inicio';
-    const item = document.querySelector(`[data-pagina="${path}"]`);
-    if (item) item.classList.add('activo');
-  </script>
-</body>
-</html>
+// Función para limpiar la consola
+function limpiarConsola() {
+  consola.innerHTML = '';
+  logConsola('Consola limpiada', 'sistema');
+}
