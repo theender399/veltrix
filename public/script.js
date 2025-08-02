@@ -122,3 +122,20 @@ if (document.readyState === 'loading') {
 window.addEventListener('beforeunload', () => {
   clearInterval(refreshInterval);
 });
+// script.js
+const executeCommand = async (command) => {
+  const response = await fetch('/.netlify/functions/rcon-command', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ command })
+  });
+  
+  if (!response.ok) throw new Error('Error en RCON');
+  return await response.json();
+};
+
+// Ejemplo de uso:
+document.getElementById('btn-list').addEventListener('click', async () => {
+  const { response } = await executeCommand('list');
+  console.log('Jugadores conectados:', response);
+});
