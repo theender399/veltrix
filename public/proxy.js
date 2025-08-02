@@ -1,8 +1,8 @@
 // Configuración RCON
 const RCON_CONFIG = {
-  host: '172.93.110.246',
+  host: 'tu-servidor-minecraft.com',
   port: 25575, // Puerto RCON
-  password: '11241112412434532112324345321123', // Se obtendrá del backend seguro
+  password: '', // Se obtendrá del backend seguro
   timeout: 5000
 };
 
