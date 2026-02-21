@@ -2,8 +2,8 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #111;
-  color: #00ffaa;
+  background: #4a148c; /* Morado oscuro */
+  color: #ff69b4; /* Rosa vibrante */
   padding-top: 60px; /* Para menú fijo */
   text-align: center;
 }
@@ -21,7 +21,7 @@ h1 {
 
 #menu-superior {
   display: flex;
-  background: #222;
+  background: #6a1b9a; /* Morado más claro para menú */
   padding: 10px 20px;
   justify-content: center;
   gap: 25px;
@@ -34,7 +34,7 @@ h1 {
 }
 
 .menu-item {
-  color: #00ffaa;
+  color: #ff69b4; /* Rosa */
   cursor: pointer;
   font-weight: bold;
   position: relative;
@@ -46,12 +46,12 @@ h1 {
 }
 
 .menu-item:hover {
-  background-color: #00ffaa22;
+  background-color: #ff69b422; /* Rosa transparente */
 }
 
 .descripcion {
   font-size: 0.7rem;
-  color: #55ffaa;
+  color: #ffb6c1; /* Rosa claro */
   position: absolute;
   top: 32px;
   left: 50%;
@@ -69,7 +69,7 @@ h1 {
 }
 
 .tienda .descripcion.proximamente {
-  color: #ff4444;
+  color: #ff4444; /* Mantengo rojo para "próximamente" */
   font-weight: bold;
   font-size: 0.7rem;
   margin-top: 3px;
